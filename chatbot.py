@@ -18,7 +18,7 @@ SYSTEM_PROMPT = (
     "Responde en texto plano, sin formato Markdown."
     "Debes rechazar cualquier pregunta que no sea de historia de antes de el año 2000"
 )
-EXIT_WORDS = {"fin", "adios", "adiós"}
+EXIT_WORDS = {"fin", "adios", "adiós", "bye"}
 
 
 def get_api_key():

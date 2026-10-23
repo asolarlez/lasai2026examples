@@ -3,9 +3,10 @@ para calcular el día de la semana de una fecha.
 
 Uso:
     export OPENROUTER_API_KEY=sk-or-...
-    python herramienta.py
+    python herramienta.py [--debug]
 """
 
+import argparse
 import json
 import os
 import sys
@@ -22,7 +23,8 @@ SYSTEM_PROMPT = (
     "Si necesitas saber en qué día de la semana ocurrió algo, usa siempre la "
     "herramienta dia_de_la_semana en lugar de adivinarlo."
 )
-EXIT_WORDS = {"fin", "adios", "adiós"}
+EXIT_WORDS = {"fin", "adios", "adiós", "bye"}
+DEBUG = False
 
 DAY_NAMES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
 # First day of the Gregorian calendar (Spain, Italy, Portugal, Poland).
@@ -117,6 +119,12 @@ def post_chat(messages, api_key):
     return response.json()["choices"][0]["message"]
 
 
+def debug_print(message):
+    """Print the raw model message when running with --debug."""
+    if DEBUG:
+        print("[DEBUG] " + json.dumps(message, indent=2, ensure_ascii=False))
+
+
 def ask_model(messages, api_key):
     """Query the model, running any tool calls it makes, until it gives a final reply.
 
@@ -124,6 +132,7 @@ def ask_model(messages, api_key):
     """
     while True:
         message = post_chat(messages, api_key)
+        debug_print(message)
         tool_calls = message.get("tool_calls")
         if not tool_calls:
             return message["content"]
@@ -167,4 +176,7 @@ def chat():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Chatbot de historia para niños.")
+    parser.add_argument("--debug", action="store_true", help="muestra las respuestas crudas del modelo")
+    DEBUG = parser.parse_args().debug
     chat()
